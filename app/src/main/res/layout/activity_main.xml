@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#49716F">
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:useDefaultMargins="true"
+        android:rowCount="3"
+        android:columnCount="3">
+
+        <TextView
+            android:id="@+id/textClima"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_row="0"
+            android:layout_column="0"
+            android:layout_columnSpan="2"
+            android:layout_gravity="fill_horizontal"
+            android:gravity="center"
+            android:text="Clima Despejado"
+            android:textColor="#FFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_row="1"
+            android:layout_column="0"
+            android:layout_below="@+id/textClima"
+            android:layout_gravity="center"
+            android:src="@drawable/icono_tiempo"/>
+
+        <TextView
+            android:id="@+id/textGrados"
+            android:layout_width="wrap_content"
+            android:layout_height="130dp"
+            android:layout_row="1"
+            android:layout_column="1"
+            android:gravity="center"
+            android:text="18°"
+            android:textStyle="bold"
+            android:textSize="64sp"
+            android:textColor="#FFFF"/>
+
+        <TextView
+            android:id="@+id/textCiudad"
+            android:paddingRight="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_row="0"
+            android:textAlignment="textEnd"
+            android:layout_column="2"
+            android:text="Tu Ciudad:\nCiudad Obregón"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:textColor="#FFFF"/>
+
+    </GridLayout>
+
+    <!-- RelativeLayout en la parte inferior -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- SearchView -->
+
+        <TextView
+            android:id="@+id/textSearch"
+            android:text="Tu ciudad preferida:"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textColor="#FFFF"/>
+
+        <SearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textSearch"
+            android:background="#FFFF"/>
+
+        <!-- LinearLayout dentro del RelativeLayout -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@id/search_view">
+
+            <!-- Agrega aquí los elementos de tu segundo LinearLayout -->
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ScrollView"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:layout_margin="8dp"
+                android:contentDescription="Imagen del clima de la semana"/>
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pronóstico de 24 horas"
+        android:textSize="18sp"
+        android:paddingLeft="10dp"
+        android:textStyle="bold"
+        android:textColor="#FFFF"/>
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="180dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="Imagen del clima de la semana"
+                android:scaleType="fitCenter"
+                android:src="@drawable/pronostico24h" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <Button
+        android:layout_width="257dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Compara ciudades"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        android:backgroundTint="#E08A02"/>
+
+</LinearLayout>
