@@ -112,7 +112,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ScrollView"
+                android:src="@drawable/scrollview"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
                 android:layout_margin="8dp"
@@ -150,6 +150,7 @@
     </HorizontalScrollView>
 
     <Button
+        android:id="@+id/BotonAbrirCompararCiudades"
         android:layout_width="257dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"

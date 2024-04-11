@@ -11,7 +11,7 @@
         android:layout_height="wrap_content">
 
         <Button
-            android:id="@+id/boton"
+            android:id="@+id/botonRegresar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
@@ -28,7 +28,7 @@
 
         <!-- SearchView -->
         <SearchView
-            android:id="@+id/search_view"
+            android:id="@+id/search_viewComparar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#FFFF"/>
@@ -67,7 +67,7 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/Madrid"
+        android:src="@drawable/madrid"
         android:scaleType="centerCrop"
         android:padding="10dp"/>
 
@@ -78,7 +78,7 @@
 
         <!-- SearchView -->
         <SearchView
-            android:id="@+id/search_view"
+            android:id="@+id/search_viewComparar2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#FFFF"/>
@@ -117,7 +117,7 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/Obregon"
+        android:src="@drawable/obregon"
         android:scaleType="centerCrop"
         android:padding="10dp"/>/>
 
