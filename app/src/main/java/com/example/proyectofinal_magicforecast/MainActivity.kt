@@ -24,11 +24,15 @@ import androidx.core.app.ActivityCompat
 import retrofit2.Call
 import retrofit2.Response
 import com.bumptech.glide.Glide
+import com.example.proyectofinal_magicforecast.data.AppDatabase
+import com.example.proyectofinal_magicforecast.data.WeatherDao
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var db: AppDatabase
+    private lateinit var weatherDao: WeatherDao
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
@@ -38,6 +42,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        db = AppDatabase.getDatabase(this)
+        weatherDao = db.weatherDao()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         checkLocationPermission()
 
