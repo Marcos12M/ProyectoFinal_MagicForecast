@@ -11,4 +11,13 @@ interface ServicioClima {
         @Query("units") units: String,
         @Query("appid") apiKey: String
     ): Call<WeatherResponse>
+
+    @GET("forecast")
+    fun getForecast(
+        @Query("lat") lat: Double,
+        @Query("lon") lon: Double,
+        @Query("cnt") count: Int,
+        @Query("appid") apiKey: String,
+        @Query("units") units: String
+    ): Call<ForecastResponse>
 }

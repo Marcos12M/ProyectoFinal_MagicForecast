@@ -21,19 +21,19 @@
             android:layout_columnSpan="2"
             android:layout_gravity="fill_horizontal"
             android:gravity="center"
-            android:text="Clima Despejado"
+            android:text="Clima"
             android:textColor="#FFFF"
             android:textSize="20sp"
             android:textStyle="bold" />
 
         <ImageView
+            android:id="@+id/imgClima"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_row="1"
             android:layout_column="0"
             android:layout_below="@+id/textClima"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_sunnycloudy" />
+            android:layout_gravity="center"/>
 
         <TextView
             android:id="@+id/textGrados"
@@ -53,40 +53,49 @@
             android:layout_height="wrap_content"
             android:layout_row="0"
             android:layout_column="2"
-            android:paddingRight="10dp"
-            android:text="Tu Ciudad:\nCiudad Obregón"
             android:textAlignment="textEnd"
             android:textColor="#FFFF"
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/textWind"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_row="1"
-                android:layout_column="2"
                 android:layout_gravity="fill_horizontal"
                 android:gravity="center"
-                android:text="Clima Despejado"
+                android:text=""
                 android:textColor="#FFFF"
-                android:textSize="20sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textPressure"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_row="1"
-                android:layout_column="2"
                 android:layout_below="@id/textWind"
                 android:layout_gravity="fill_horizontal"
                 android:gravity="center"
-                android:text="SAPO"
+                android:text=""
                 android:textColor="#FFFF"
-                android:textSize="20sp"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textHumidity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/textWind"
+                android:layout_gravity="fill_horizontal"
+                android:gravity="center"
+                android:text=""
+                android:textColor="#FFFF"
+                android:textSize="14sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -114,7 +123,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/textSearch"
-            android:background="#FFFF" />
+            android:background="#FFFF"
+            android:layout_marginBottom="10dp"/>
 
         <!-- LinearLayout dentro del RelativeLayout -->
         <LinearLayout
@@ -135,18 +145,11 @@
         android:layout_height="200dp">
 
         <LinearLayout
+            android:id="@+id/linearLayout_forecast"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:adjustViewBounds="true"
-                android:contentDescription="Imagen del clima de la semana"
-                android:scaleType="fitCenter"
-                android:src="@drawable/scrollview" />
         </LinearLayout>
     </HorizontalScrollView>
 
