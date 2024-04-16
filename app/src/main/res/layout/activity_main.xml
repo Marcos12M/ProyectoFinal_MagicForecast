@@ -2,15 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#49716F">
+    android:background="#49716F"
+    android:orientation="vertical">
 
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:useDefaultMargins="true"
+        android:columnCount="3"
         android:rowCount="3"
-        android:columnCount="3">
+        android:useDefaultMargins="true">
 
         <TextView
             android:id="@+id/textClima"
@@ -27,38 +27,68 @@
             android:textStyle="bold" />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_row="1"
             android:layout_column="0"
             android:layout_below="@+id/textClima"
             android:layout_gravity="center"
-            android:src="@drawable/icono_tiempo"/>
+            android:src="@drawable/ic_sunnycloudy" />
 
         <TextView
             android:id="@+id/textGrados"
-            android:layout_width="wrap_content"
-            android:layout_height="130dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_row="1"
             android:layout_column="1"
             android:gravity="center"
-            android:text="18°"
-            android:textStyle="bold"
-            android:textSize="64sp"
-            android:textColor="#FFFF"/>
+            android:text=""
+            android:textColor="#FFFF"
+            android:textSize="40sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/textCiudad"
-            android:paddingRight="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_row="0"
-            android:textAlignment="textEnd"
             android:layout_column="2"
+            android:paddingRight="10dp"
             android:text="Tu Ciudad:\nCiudad Obregón"
-            android:textStyle="bold"
+            android:textAlignment="textEnd"
+            android:textColor="#FFFF"
             android:textSize="20sp"
-            android:textColor="#FFFF"/>
+            android:textStyle="bold" />
+
+        <LinearLayout>
+
+            <TextView
+                android:id="@+id/textWind"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_row="1"
+                android:layout_column="2"
+                android:layout_gravity="fill_horizontal"
+                android:gravity="center"
+                android:text="Clima Despejado"
+                android:textColor="#FFFF"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textPressure"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_row="1"
+                android:layout_column="2"
+                android:layout_below="@id/textWind"
+                android:layout_gravity="fill_horizontal"
+                android:gravity="center"
+                android:text="SAPO"
+                android:textColor="#FFFF"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
     </GridLayout>
 
@@ -71,27 +101,27 @@
 
         <TextView
             android:id="@+id/textSearch"
-            android:text="Tu ciudad preferida:"
-            android:gravity="center"
-            android:textSize="20sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textColor="#FFFF"/>
+            android:gravity="center"
+            android:text="Tu ciudad preferida:"
+            android:textColor="#FFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <SearchView
             android:id="@+id/search_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/textSearch"
-            android:background="#FFFF"/>
+            android:background="#FFFF" />
 
         <!-- LinearLayout dentro del RelativeLayout -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_below="@id/search_view">
+            android:layout_below="@id/search_view"
+            android:orientation="vertical">
 
             <!-- Agrega aquí los elementos de tu segundo LinearLayout -->
 
@@ -112,22 +142,22 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/scrollview"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter"
                 android:layout_margin="8dp"
-                android:contentDescription="Imagen del clima de la semana"/>
+                android:adjustViewBounds="true"
+                android:contentDescription="Imagen del clima de la semana"
+                android:scaleType="fitCenter"
+                android:src="@drawable/scrollview" />
         </LinearLayout>
     </HorizontalScrollView>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Pronóstico de 24 horas"
-        android:textSize="18sp"
         android:paddingLeft="10dp"
-        android:textStyle="bold"
-        android:textColor="#FFFF"/>
+        android:text="Pronóstico de 24 horas"
+        android:textColor="#FFFF"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <HorizontalScrollView
         android:layout_width="match_parent"
@@ -154,9 +184,9 @@
         android:layout_width="257dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:backgroundTint="#E08A02"
         android:text="Compara ciudades"
         android:textSize="20dp"
-        android:textStyle="bold"
-        android:backgroundTint="#E08A02"/>
+        android:textStyle="bold" />
 
 </LinearLayout>

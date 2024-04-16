@@ -84,7 +84,18 @@ class MainActivity : AppCompatActivity() {
                     if (response.isSuccessful) {
                         response.body()?.let {
                             val temp = it.main.temp
-                            findViewById<TextView>(R.id.textGrados).text = "${temp}°C"
+                            val tempString = "%.0f".format(temp)
+                            val description = it.weather[0].description
+                            val pressure = it.main.pressure
+                            val windSpeed = it.wind.speed
+                            val humidity = it.main.humidity
+
+                            // Actualizar la interfaz de usuario con los nuevos datos
+                            findViewById<TextView>(R.id.textGrados).text = "$tempString°C"
+                            findViewById<TextView>(R.id.textClima).text = "Descripción: $description"
+                            findViewById<TextView>(R.id.textPressure).text = "Presión: $pressure hPa"
+                            findViewById<TextView>(R.id.textWind).text = "Velocidad del viento: $windSpeed m/s"
+                            findViewById<TextView>(R.id.textHumedad).text = "Humedad: $humidity %"
                         }
                     } else {
                         Toast.makeText(applicationContext, "Error al obtener clima", Toast.LENGTH_SHORT).show()
