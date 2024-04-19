@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">ProyectoFinal_MagicForecast</string>
+    <string name="clima">Clima</string>
+    <string name="pronostico24">Pronóstico de 24 horas</string>
+    <string name="icono_de_clima">Icono de clima</string>
+    <string name="ciudad_pref">Tu ciudad preferida:</string>
+    <string name="compara_ciudades">Compara ciudades</string>
+    <string name="img_clima_prueba">Imagen del clima de la semana</string>
+    <string name="pronostico_5">Pronósitco en 5 días</string>
+    <string name="sin_ciudad">No hay una ciudad seleccionada / encontrada</string>
 </resources>

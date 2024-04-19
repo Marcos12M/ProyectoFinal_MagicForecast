@@ -148,16 +148,16 @@ class MainActivity : AppCompatActivity() {
 
                             findViewById<ImageView>(R.id.imgClima).setImageResource(iconResourceId)
 
-                            findViewById<TextView>(R.id.textCiudad).text = "Tu Ciudad:\n$country"
+                            findViewById<TextView>(R.id.textCiudad).text = "$country"
                             findViewById<TextView>(R.id.textGrados).text = "$tempString°C"
 
                             val descripcion = when (description) {
                                 "clear sky" -> "Cielo despejado"
-                                "few clouds" -> "Hay algunas nubes"
-                                "overcast clouds" -> "Clima nublado"
-                                "drizzle" -> "Hay llovizna"
-                                "rain" -> "Hay lluvia"
-                                "shower rain" -> "Hay lluvia intensa"
+                                "few clouds" -> "Hay pocas nubes"
+                                "scattered clouds" -> "Hay nubes dispersas"
+                                "broken clouds" -> "Esta nublado"
+                                "shower rain" -> "Hay un aguacero"
+                                "rain" -> "Esta lloviendo"
                                 "thunderstorm" -> "Hay tormenta eléctrica"
                                 "snow" -> "Clima con nieve"
                                 "mist" -> "Clima con niebla"
@@ -197,12 +197,16 @@ class MainActivity : AppCompatActivity() {
                         response.body()?.let {
                             val list = it.list
                             val filteredList = list.filterIndexed { index, _ -> index % 8 == 0 }
+
+                            val linearLayout =
+                                findViewById<LinearLayout>(R.id.linearLayout_forecast)
+                            linearLayout.removeAllViews()
                             filteredList.forEach { forecast ->
                                 val dateTimeString = forecast.dt_txt
                                 val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                                 val dateTime = LocalDateTime.parse(dateTimeString, formatter)
                                 val formattedDate =
-                                    dateTime.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                                    dateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                                 val iconFileName = "c${forecast.weather[0].icon}"
                                 val temp = "${forecast.main.temp}°"
                                 val wind = "${forecast.wind.speed} m/s"
@@ -223,7 +227,6 @@ class MainActivity : AppCompatActivity() {
                                 )
                                 forecastLayout.layoutParams = layoutParams
                                 forecastLayout.orientation = LinearLayout.VERTICAL
-                                forecastLayout.setBackgroundColor(Color.WHITE)
 
                                 val dateTextView = TextView(this@MainActivity)
                                 dateTextView.text = formattedDate
@@ -270,8 +273,6 @@ class MainActivity : AppCompatActivity() {
                                 humidityTextView.setTypeface(null, Typeface.BOLD)
                                 forecastLayout.addView(humidityTextView)
 
-                                val linearLayout =
-                                    findViewById<LinearLayout>(R.id.linearLayout_forecast)
                                 linearLayout.addView(forecastLayout)
                             }
                         }
