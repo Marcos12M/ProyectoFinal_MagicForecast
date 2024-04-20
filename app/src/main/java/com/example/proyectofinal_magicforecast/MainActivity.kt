@@ -4,18 +4,23 @@ import android.Manifest
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.content.Intent
+import android.database.Cursor
+import android.database.MatrixCursor
 import android.graphics.Color
 import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.BaseColumns
 import android.util.TypedValue
 import android.view.Gravity
 import android.widget.Button
+import android.widget.CursorAdapter
 import android.widget.TextView
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.SearchView
+import android.widget.SimpleCursorAdapter
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import android.widget.Toast
@@ -23,7 +28,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import retrofit2.Call
 import retrofit2.Response
-import com.bumptech.glide.Glide
 import com.example.proyectofinal_magicforecast.data.AppDatabase
 import com.example.proyectofinal_magicforecast.data.WeatherDao
 import java.time.LocalDateTime
@@ -33,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var db: AppDatabase
     private lateinit var weatherDao: WeatherDao
+    private lateinit var searchAdapter: CursorAdapter
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
@@ -53,6 +58,51 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        val searchView = findViewById<SearchView>(R.id.search_view)
+        searchAdapter = SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, null, arrayOf("city"), intArrayOf(android.R.id.text1), 0)
+        searchView.suggestionsAdapter = searchAdapter
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                searchForCity(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                return false
+            }
+        })
+
+        searchView.setOnSuggestionListener(object : SearchView.OnSuggestionListener {
+            override fun onSuggestionSelect(position: Int): Boolean {
+                return true
+            }
+
+            override fun onSuggestionClick(position: Int): Boolean {
+                val cursor = searchAdapter.getItem(position) as Cursor
+                val index = cursor.getColumnIndex("city")
+                val city = cursor.getString(index)
+                searchForCity(city)
+                searchView.setQuery(city, false)
+                return true
+            }
+        })
+
+        // Carga el historial de búsqueda cuando se abre el SearchView
+        searchView.setOnSearchClickListener {
+            loadSearchHistory()
+        }
+
+    }
+
+    private fun loadSearchHistory() {
+        val history = getSearchHistory()
+        val cursor = MatrixCursor(arrayOf(BaseColumns._ID, "city"))
+
+        history.forEachIndexed { index, city ->
+            cursor.addRow(arrayOf(index, city))
+        }
+
+        searchAdapter.changeCursor(cursor)
     }
 
     private fun checkLocationPermission() {
@@ -117,6 +167,52 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun searchForCity(city: String) {
+        ClienteAPI.instance.getCurrentWeatherCity(city, "metric", "0f2d487b9ae4f71cc6f8eacc1f5cad8c")
+            .enqueue(object : retrofit2.Callback<WeatherResponse> {
+                override fun onResponse(
+                    call: Call<WeatherResponse>,
+                    response: Response<WeatherResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        val weatherData = response.body()
+                        saveSearchToHistory(city)
+                        updateUI(weatherData)
+                    } else {
+                        Toast.makeText(applicationContext, "Error al obtener clima a", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
+                    Toast.makeText(applicationContext, t.message, Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
+
+    private fun updateUI(weatherData: WeatherResponse?) {
+        weatherData?.let { weather ->
+            fetchWeather(weather.coord.lat, weather.coord.lon)
+            fetchForecast(weather.coord.lat, weather.coord.lon)
+        } ?: run {
+            Toast.makeText(this, "No se pudo actualizar la UI con los datos del clima.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun saveSearchToHistory(city: String) {
+        val sharedPreferences = getSharedPreferences("weatherApp", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        val searches = getSearchHistory().toMutableSet() // Obtiene el historial actual y lo convierte en un MutableSet para evitar duplicados
+
+        searches.add(city) // Añade la nueva búsqueda al conjunto
+        editor.putStringSet("searchHistory", searches)
+        editor.apply()
+    }
+
+    private fun getSearchHistory(): Set<String> {
+        val sharedPreferences = getSharedPreferences("weatherApp", MODE_PRIVATE)
+        return sharedPreferences.getStringSet("searchHistory", setOf()) ?: setOf()
     }
 
     private fun fetchWeather(lat: Double, lon: Double) {
