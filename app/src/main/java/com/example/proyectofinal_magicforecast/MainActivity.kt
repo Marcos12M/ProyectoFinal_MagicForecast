@@ -244,8 +244,6 @@ class MainActivity : AppCompatActivity() {
                             val humidity = it.main.humidity
                             val country = it.name
 
-                            deleteDatabase()
-
                             val iconFileName = "c${it.weather[0].icon}"
 
                             val weather = WeatherBD(
@@ -487,7 +485,102 @@ class MainActivity : AppCompatActivity() {
                 override fun onFailure(call: Call<ForecastResponse>, t: Throwable) {
                     Toast.makeText(applicationContext, t.message, Toast.LENGTH_SHORT).show()
                     println(t.message)
+
+                    val linearLayout =
+                        findViewById<LinearLayout>(R.id.linearLayout_forecast)
+                    linearLayout.removeAllViews()
+
+                    // Intenta obtener los últimos 5 datos del pronóstico del clima de la base de datos
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val dao = AppDatabase.getDatabase(applicationContext).forecastDao()
+                        val savedForecastList = dao.getAllForecast()
+
+                        val lastFiveForecast = if (savedForecastList.size >= 5) {
+                            savedForecastList.subList(savedForecastList.size - 5, savedForecastList.size)
+                        } else {
+                            savedForecastList
+                        }
+
+                        if (lastFiveForecast.isNotEmpty()) {
+                            // Si se encuentran datos del pronóstico del clima en la base de datos, crea y muestra las vistas
+                            withContext(Dispatchers.Main) {
+                                lastFiveForecast.forEach { forecast ->
+                                    val formattedDate = forecast.date
+                                    val iconFileName = forecast.icon
+                                    val temp = "${forecast.temp}°"
+                                    val wind = "${forecast.windSpeed} m/s"
+                                    val humidity = "${forecast.humidity}%"
+
+                                    val forecastLayout = LinearLayout(this@MainActivity)
+                                    val marginInPixels = (10 * resources.displayMetrics.density).toInt()
+                                    val layoutParams = LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.MATCH_PARENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT
+                                    )
+                                    layoutParams.setMargins(20, 0, 20, marginInPixels)
+                                    forecastLayout.layoutParams = layoutParams
+                                    forecastLayout.orientation = LinearLayout.VERTICAL
+
+                                    val dateTextView = TextView(this@MainActivity)
+                                    dateTextView.text = formattedDate
+                                    dateTextView.setTextColor(Color.BLACK)
+                                    dateTextView.gravity = Gravity.CENTER
+                                    dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                                    dateTextView.setTypeface(null, Typeface.BOLD)
+                                    forecastLayout.addView(dateTextView)
+
+                                    val iconImageView = ImageView(this@MainActivity)
+                                    val iconResourceId =
+                                        resources.getIdentifier(iconFileName, "drawable", packageName)
+                                    iconImageView.setImageResource(iconResourceId)
+                                    val iconParams = LinearLayout.LayoutParams(
+                                        290,
+                                        290
+                                    )
+                                    iconParams.gravity = Gravity.CENTER
+                                    iconImageView.layoutParams = iconParams
+                                    forecastLayout.addView(iconImageView)
+
+                                    val tempTextView = TextView(this@MainActivity)
+                                    tempTextView.text = temp
+                                    tempTextView.setTextColor(Color.BLACK)
+                                    tempTextView.gravity = Gravity.CENTER
+                                    tempTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                                    tempTextView.setTypeface(null, Typeface.BOLD)
+                                    forecastLayout.addView(tempTextView)
+
+                                    val windTextView = TextView(this@MainActivity)
+                                    windTextView.text = wind
+                                    windTextView.setTextColor(Color.BLACK)
+                                    windTextView.gravity = Gravity.CENTER
+                                    windTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                                    windTextView.setTypeface(null, Typeface.BOLD)
+                                    forecastLayout.addView(windTextView)
+
+                                    val humidityTextView = TextView(this@MainActivity)
+                                    humidityTextView.text = humidity
+                                    humidityTextView.setTextColor(Color.BLACK)
+                                    humidityTextView.gravity = Gravity.CENTER
+                                    humidityTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                                    humidityTextView.setTypeface(null, Typeface.BOLD)
+                                    forecastLayout.addView(humidityTextView)
+
+                                    linearLayout.addView(forecastLayout)
+                                }
+                            }
+                        } else {
+                            // Si no se encuentran datos del pronóstico del clima en la base de datos, muestra un mensaje de error
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "No se encontraron datos de pronóstico del clima en la base de datos",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
                 }
+
             })
     }
 
