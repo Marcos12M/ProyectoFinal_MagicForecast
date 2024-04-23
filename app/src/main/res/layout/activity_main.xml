@@ -227,6 +227,7 @@
         app:layout_constraintTop_toBottomOf="@+id/forecast_text">
 
         <LinearLayout
+            android:id="@+id/linearLayout_forecastDAY"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"

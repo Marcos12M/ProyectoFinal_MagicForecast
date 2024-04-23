@@ -28,10 +28,15 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import retrofit2.Call
 import retrofit2.Response
-import com.example.proyectofinal_magicforecast.data.AppDatabase
-import com.example.proyectofinal_magicforecast.data.WeatherDao
+import com.example.proyectofinal_magicforecast.data.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import android.util.Log
+import kotlinx.coroutines.withContext
+import androidx.appcompat.app.AlertDialog
 
 class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -162,6 +167,7 @@ class MainActivity : AppCompatActivity() {
                     val longitude = location.longitude
                     fetchWeather(latitude, longitude)
                     fetchForecast(latitude, longitude)
+                    fetchForecastDay(latitude, longitude)
                 } else {
                     Toast.makeText(this, "Ubicación no disponible.", Toast.LENGTH_SHORT).show()
                 }
@@ -195,6 +201,7 @@ class MainActivity : AppCompatActivity() {
         weatherData?.let { weather ->
             fetchWeather(weather.coord.lat, weather.coord.lon)
             fetchForecast(weather.coord.lat, weather.coord.lon)
+            fetchForecastDay(weather.coord.lat, weather.coord.lon)
         } ?: run {
             Toast.makeText(this, "No se pudo actualizar la UI con los datos del clima.", Toast.LENGTH_SHORT).show()
         }
@@ -237,7 +244,33 @@ class MainActivity : AppCompatActivity() {
                             val humidity = it.main.humidity
                             val country = it.name
 
+                            deleteDatabase()
+
                             val iconFileName = "c${it.weather[0].icon}"
+
+                            val weather = WeatherBD(
+                                temp = temp,
+                                description = description,
+                                pressure = pressure,
+                                windSpeed = windSpeed,
+                                humidity = humidity,
+                                country = country,
+                                icon = iconFileName
+                            )
+
+                            // Insertar en la base de datos utilizando coroutines
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val dao = AppDatabase.getDatabase(applicationContext).weatherDao()
+                                dao.insert(weather)
+
+                                // Consultar y verificar si los datos se guardaron correctamente
+                                val savedWeather = dao.getWeather()
+                                if (savedWeather != null) {
+                                    Log.d("Weather", "Datos guardados correctamente: Temperature: ${savedWeather.temp}, Description: ${savedWeather.description}, Pressure: ${savedWeather.pressure}, Wind Speed: ${savedWeather.windSpeed}, Humidity: ${savedWeather.humidity}, Country: ${savedWeather.country}, Icon: ${savedWeather.icon}")
+                                } else {
+                                    Log.e("Weather", "Error: No se encontraron datos guardados")
+                                }
+                            }
 
                             val iconResourceId =
                                 resources.getIdentifier(iconFileName, "drawable", packageName)
@@ -276,7 +309,58 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
-                    Toast.makeText(applicationContext, t.message, Toast.LENGTH_SHORT).show()
+                    val builder = AlertDialog.Builder(this@MainActivity)
+                    builder.setTitle("Datos cargados")
+                    builder.setMessage("Se han cargado los datos desde la base de datos")
+                    builder.setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    val dialog = builder.create()
+                    dialog.show()
+
+                    // Intenta obtener el último clima guardado de la base de datos
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val dao = AppDatabase.getDatabase(applicationContext).weatherDao()
+                        val savedWeather = dao.getWeather()
+                        if (savedWeather != null) {
+
+                            // Si se encuentra un clima guardado, actualiza la interfaz de usuario con esos datos
+                            withContext(Dispatchers.Main) {
+
+                                val iconResourceId =
+                                    resources.getIdentifier(savedWeather.icon, "drawable", packageName)
+
+                                findViewById<ImageView>(R.id.imgClima).setImageResource(iconResourceId)
+
+                                findViewById<TextView>(R.id.textCiudad).text = "${savedWeather.country}"
+                                findViewById<TextView>(R.id.textGrados).text = "${"%.0f".format(savedWeather.temp)}°C"
+
+                                val descripcion = when (savedWeather.description) {
+                                    "clear sky" -> "Cielo despejado"
+                                    "few clouds" -> "Hay pocas nubes"
+                                    "scattered clouds" -> "Hay nubes dispersas"
+                                    "broken clouds" -> "Esta nublado"
+                                    "shower rain" -> "Hay un aguacero"
+                                    "rain" -> "Esta lloviendo"
+                                    "thunderstorm" -> "Hay tormenta eléctrica"
+                                    "snow" -> "Clima con nieve"
+                                    "mist" -> "Clima con niebla"
+                                    else -> "???"
+                                }
+
+                                findViewById<TextView>(R.id.textClima).text = "$descripcion"
+                                findViewById<TextView>(R.id.textPressure).text =
+                                    "Presión: ${savedWeather.pressure} hPa"
+                                findViewById<TextView>(R.id.textWind).text = "Viento: ${savedWeather.windSpeed} m/s"
+                                findViewById<TextView>(R.id.textHumidity).text = "Humedad: ${savedWeather.humidity} %"
+                            }
+                        } else {
+                            // Si no se encuentra ningún clima guardado, muestra un mensaje de error
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(applicationContext, "No se encontraron datos guardados", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
                 }
             })
     }
@@ -290,23 +374,42 @@ class MainActivity : AppCompatActivity() {
                     response: Response<ForecastResponse>
                 ) {
                     if (response.isSuccessful) {
-                        response.body()?.let {
-                            val list = it.list
-                            val filteredList = list.filterIndexed { index, _ -> index % 8 == 0 }
+                    response.body()?.let {
+                        val list = it.list
+                        val filteredList = list.filterIndexed { index, _ -> index % 8 == 0 }
 
-                            val linearLayout =
-                                findViewById<LinearLayout>(R.id.linearLayout_forecast)
-                            linearLayout.removeAllViews()
-                            filteredList.forEach { forecast ->
-                                val dateTimeString = forecast.dt_txt
-                                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                                val dateTime = LocalDateTime.parse(dateTimeString, formatter)
-                                val formattedDate =
-                                    dateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                                val iconFileName = "c${forecast.weather[0].icon}"
-                                val temp = "${forecast.main.temp}°"
-                                val wind = "${forecast.wind.speed} m/s"
-                                val humidity = "${forecast.main.humidity}%"
+                        val linearLayout =
+                            findViewById<LinearLayout>(R.id.linearLayout_forecast)
+                        linearLayout.removeAllViews()
+
+                        val dao = AppDatabase.getDatabase(applicationContext).forecastDao()
+
+                        filteredList.forEach { forecast ->
+                            val dateTimeString = forecast.dt_txt
+                            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                            val dateTime = LocalDateTime.parse(dateTimeString, formatter)
+                            val formattedDate =
+                                dateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                            val iconFileName = "c${forecast.weather[0].icon}"
+                            val temp = "${forecast.main.temp}°"
+                            val wind = "${forecast.wind.speed} m/s"
+                            val humidity = "${forecast.main.humidity}%"
+
+                            val forecastEntry = ForecastBD(
+                                date = formattedDate,
+                                temp = forecast.main.temp,
+                                windSpeed = forecast.wind.speed,
+                                humidity = forecast.main.humidity,
+                                icon = iconFileName
+                            )
+
+                            // Insertar en la base de datos utilizando coroutines
+                            CoroutineScope(Dispatchers.IO).launch {
+                                dao.insert(forecastEntry)
+
+                                // Registro de un mensaje de log después de insertar en la base de datos
+                                Log.d("Forecast", "Datos del pronóstico insertados en la base de datos: Date: $formattedDate, Temperature: $temp, Wind Speed: $wind, Humidity: $humidity, Icon: $iconFileName")
+                            }
 
                                 val forecastLayout = LinearLayout(this@MainActivity)
                                 val marginInPixels =
@@ -387,4 +490,125 @@ class MainActivity : AppCompatActivity() {
                 }
             })
     }
+
+    private fun fetchForecastDay(lat: Double, lon: Double) {
+        ClienteAPI.instance.getForecast(lat, lon, 40, "0f2d487b9ae4f71cc6f8eacc1f5cad8c", "metric")
+            .enqueue(object : retrofit2.Callback<ForecastResponse> {
+                @RequiresApi(Build.VERSION_CODES.O)
+                override fun onResponse(
+                    call: Call<ForecastResponse>,
+                    response: Response<ForecastResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        response.body()?.let {
+                            val list = it.list
+                            val filteredList = list.take(8)
+
+                            val linearLayout =
+                                findViewById<LinearLayout>(R.id.linearLayout_forecastDAY)
+                            linearLayout.removeAllViews()
+
+                            val horizontalLayout = LinearLayout(this@MainActivity)
+                            horizontalLayout.layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            )
+                            horizontalLayout.orientation = LinearLayout.HORIZONTAL
+
+                            filteredList.forEach { forecast ->
+                                val dateTimeString = forecast.dt_txt
+                                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                                val dateTime = LocalDateTime.parse(dateTimeString, formatter)
+                                val formattedDate =
+                                    dateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                                val formattedTime =
+                                    dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
+                                val temp = "${forecast.main.temp}°"
+                                val wind = "${forecast.wind.speed} m/s"
+                                val humidity = "${forecast.main.humidity}%"
+
+                                val forecastLayout = LinearLayout(this@MainActivity)
+                                val marginInPixels =
+                                    (10 * resources.displayMetrics.density).toInt()
+                                val layoutParams = LinearLayout.LayoutParams(
+                                    300,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                layoutParams.setMargins(
+                                    20,
+                                    0,
+                                    20,
+                                    marginInPixels
+                                )
+                                forecastLayout.layoutParams = layoutParams
+                                forecastLayout.orientation = LinearLayout.VERTICAL
+
+                                val dateTextView = TextView(this@MainActivity)
+                                dateTextView.text = formattedDate
+                                dateTextView.setTextColor(Color.BLACK)
+                                dateTextView.gravity = Gravity.CENTER
+                                dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                                dateTextView.setTypeface(null, Typeface.BOLD)
+                                forecastLayout.addView(dateTextView)
+
+                                val timeTextView = TextView(this@MainActivity)
+                                timeTextView.text = formattedTime
+                                timeTextView.setTextColor(Color.BLACK)
+                                timeTextView.gravity = Gravity.CENTER
+                                timeTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                                timeTextView.setTypeface(null, Typeface.BOLD)
+                                forecastLayout.addView(timeTextView)
+
+                                val tempTextView = TextView(this@MainActivity)
+                                tempTextView.text = temp
+                                tempTextView.setTextColor(Color.BLACK)
+                                tempTextView.gravity = Gravity.CENTER
+                                tempTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                                tempTextView.setTypeface(null, Typeface.BOLD)
+                                forecastLayout.addView(tempTextView)
+
+                                val windTextView = TextView(this@MainActivity)
+                                windTextView.text = wind
+                                windTextView.setTextColor(Color.BLACK)
+                                windTextView.gravity = Gravity.CENTER
+                                windTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                                windTextView.setTypeface(null, Typeface.BOLD)
+                                forecastLayout.addView(windTextView)
+
+                                val humidityTextView = TextView(this@MainActivity)
+                                humidityTextView.text = humidity
+                                humidityTextView.setTextColor(Color.BLACK)
+                                humidityTextView.gravity = Gravity.CENTER
+                                humidityTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                                humidityTextView.setTypeface(null, Typeface.BOLD)
+                                forecastLayout.addView(humidityTextView)
+
+                                horizontalLayout.addView(forecastLayout)
+                            }
+                            linearLayout.addView(horizontalLayout)
+                        }
+                    } else {
+                        Toast.makeText(
+                            applicationContext,
+                            "Error al obtener clima",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<ForecastResponse>, t: Throwable) {
+                    Toast.makeText(applicationContext, t.message, Toast.LENGTH_SHORT).show()
+                    println(t.message)
+                }
+            })
+
+    }
+
+    private fun deleteDatabase() {
+        val context = applicationContext
+        CoroutineScope(Dispatchers.IO).launch {
+            context.deleteDatabase("weather_database")
+        }
+    }
+
 }

@@ -3,9 +3,10 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-@Database(entities = [WeatherBD::class], version = 1, exportSchema = false)
+@Database(entities = [WeatherBD::class, ForecastBD::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun weatherDao(): WeatherDao
+    abstract fun forecastDao(): ForecastDao
 
     companion object {
         @Volatile

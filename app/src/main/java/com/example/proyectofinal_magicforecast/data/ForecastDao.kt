@@ -6,10 +6,10 @@ import androidx.room.Query
 import androidx.room.OnConflictStrategy
 
 @Dao
-interface WeatherDao {
-    @Query("SELECT * FROM weather LIMIT 1")
-    fun getWeather(): WeatherBD?
+interface ForecastDao {
+    @Query("SELECT * FROM forecast")
+    fun getAllForecast(): List<ForecastBD>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(weather: WeatherBD)
+    fun insert(forecast: ForecastBD)
 }
