@@ -35,8 +35,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import android.util.Log
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 import kotlinx.coroutines.withContext
 import androidx.appcompat.app.AlertDialog
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 
 class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -168,6 +174,7 @@ class MainActivity : AppCompatActivity() {
                     fetchWeather(latitude, longitude)
                     fetchForecast(latitude, longitude)
                     fetchForecastDay(latitude, longitude)
+
                 } else {
                     Toast.makeText(this, "Ubicación no disponible.", Toast.LENGTH_SHORT).show()
                 }
@@ -373,6 +380,7 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     if (response.isSuccessful) {
                     response.body()?.let {
+
                         val list = it.list
                         val filteredList = list.filterIndexed { index, _ -> index % 8 == 0 }
 
@@ -381,6 +389,7 @@ class MainActivity : AppCompatActivity() {
                         linearLayout.removeAllViews()
 
                         val dao = AppDatabase.getDatabase(applicationContext).forecastDao()
+
 
                         filteredList.forEach { forecast ->
                             val dateTimeString = forecast.dt_txt
@@ -400,6 +409,7 @@ class MainActivity : AppCompatActivity() {
                                 humidity = forecast.main.humidity,
                                 icon = iconFileName
                             )
+
 
                             // Insertar en la base de datos utilizando coroutines
                             CoroutineScope(Dispatchers.IO).launch {
@@ -594,6 +604,7 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     if (response.isSuccessful) {
                         response.body()?.let {
+                            val entries = ArrayList<Entry>() // Lista para las entradas de la gráfica
                             val list = it.list
                             val filteredList = list.take(8)
 
@@ -677,6 +688,7 @@ class MainActivity : AppCompatActivity() {
                                 forecastLayout.addView(humidityTextView)
 
                                 horizontalLayout.addView(forecastLayout)
+
                             }
                             linearLayout.addView(horizontalLayout)
                         }

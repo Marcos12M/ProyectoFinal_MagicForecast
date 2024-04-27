@@ -31,7 +31,11 @@
             android:id="@+id/search_viewComparar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#FFFF"/>
+            android:layout_marginHorizontal="30dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/bg_white_rounded"
+            android:queryHint="Busca una ciudad"
+            android:submitBackground="@drawable/bg_white_rounded" />
 
     </RelativeLayout>
 
@@ -64,11 +68,10 @@
     </LinearLayout>
 
     <!-- ImageView en la parte inferior -->
-    <ImageView
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/mapView1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@drawable/madrid"
-        android:scaleType="centerCrop"
+        android:layout_height="150dp"
         android:padding="10dp"/>
 
     <!-- RelativeLayout para SearchView -->
@@ -81,7 +84,11 @@
             android:id="@+id/search_viewComparar2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#FFFF"/>
+            android:layout_marginHorizontal="30dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/bg_white_rounded"
+            android:queryHint="Busca una ciudad"
+            android:submitBackground="@drawable/bg_white_rounded" />
 
     </RelativeLayout>
 
@@ -114,11 +121,10 @@
     </LinearLayout>
 
     <!-- ImageView en la parte inferior -->
-    <ImageView
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/mapView2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@drawable/obregon"
-        android:scaleType="centerCrop"
-        android:padding="10dp"/>/>
+        android:layout_height="150dp"
+        android:padding="10dp"/>
 
 </LinearLayout>
