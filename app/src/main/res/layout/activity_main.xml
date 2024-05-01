@@ -222,31 +222,23 @@
 
     <HorizontalScrollView
         android:id="@+id/forecast_day"
-        android:layout_width="match_parent"
-        android:layout_height="180dp"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/BotonAbrirCompararCiudades"
         app:layout_constraintTop_toBottomOf="@+id/forecast_text">
 
         <LinearLayout
             android:id="@+id/linearLayout_forecastDAY"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:layout_width="1200dp"
+            android:layout_height="match_parent"
             android:layout_marginStart="5dp"
-            android:layout_marginTop="10dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="fill_horizontal"
-                android:text="@string/sin_ciudad"
-                android:textColor="@color/black"
-                android:textSize="15sp"
-                android:textStyle="bold"/>
+            android:orientation="vertical">
 
             <com.github.mikephil.charting.charts.LineChart
-                android:id="@+id/chart"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:id="@+id/chartForecast"
+                android:layout_width="1000dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="fill_horizontal" />
         </LinearLayout>
     </HorizontalScrollView>
 
@@ -257,11 +249,11 @@
         android:backgroundTint="@color/color2"
         android:paddingHorizontal="40dp"
         android:text="@string/compara_ciudades"
+        android:textColor="@color/white"
         android:textSize="20sp"
         android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/forecast_day"
-        android:textColor="@color/white"/>
+        app:layout_constraintStart_toStartOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

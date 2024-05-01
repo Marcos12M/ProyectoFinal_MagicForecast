@@ -1,48 +1,51 @@
 package com.example.proyectofinal_magicforecast
 
 import android.Manifest
-import androidx.core.content.ContextCompat
-import android.content.pm.PackageManager
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.BaseColumns
+import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.widget.Button
 import android.widget.CursorAdapter
-import android.widget.TextView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SearchView
 import android.widget.SimpleCursorAdapter
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import retrofit2.Call
-import retrofit2.Response
+import androidx.core.content.ContextCompat
 import com.example.proyectofinal_magicforecast.data.*
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import android.util.Log
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import kotlinx.coroutines.withContext
-import androidx.appcompat.app.AlertDialog
-import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import retrofit2.Call
+import retrofit2.Response
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -604,12 +607,14 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     if (response.isSuccessful) {
                         response.body()?.let {
-                            val entries = ArrayList<Entry>() // Lista para las entradas de la gráfica
+                            val entries = ArrayList<Entry>()
                             val list = it.list
                             val filteredList = list.take(8)
 
                             val linearLayout =
                                 findViewById<LinearLayout>(R.id.linearLayout_forecastDAY)
+                            val chart =
+                                findViewById<LineChart>(R.id.chartForecast)
                             linearLayout.removeAllViews()
 
                             val horizontalLayout = LinearLayout(this@MainActivity)
@@ -619,6 +624,10 @@ class MainActivity : AppCompatActivity() {
                             )
                             horizontalLayout.orientation = LinearLayout.HORIZONTAL
 
+                            val xvalue =  ArrayList<String>()
+                            var count = 0f
+                            val lineentry = ArrayList<Entry>()
+
                             filteredList.forEach { forecast ->
                                 val dateTimeString = forecast.dt_txt
                                 val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -627,70 +636,53 @@ class MainActivity : AppCompatActivity() {
                                     dateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                                 val formattedTime =
                                     dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
-                                val temp = "${forecast.main.temp}°"
+
+
+                                val temp = forecast.main.temp.toFloat()
                                 val wind = "${forecast.wind.speed} m/s"
                                 val humidity = "${forecast.main.humidity}%"
-
-                                val forecastLayout = LinearLayout(this@MainActivity)
-                                val marginInPixels =
-                                    (10 * resources.displayMetrics.density).toInt()
-                                val layoutParams = LinearLayout.LayoutParams(
-                                    300,
-                                    LinearLayout.LayoutParams.WRAP_CONTENT
-                                )
-                                layoutParams.setMargins(
-                                    20,
-                                    0,
-                                    20,
-                                    marginInPixels
-                                )
-                                forecastLayout.layoutParams = layoutParams
-                                forecastLayout.orientation = LinearLayout.VERTICAL
-
-                                val dateTextView = TextView(this@MainActivity)
-                                dateTextView.text = formattedDate
-                                dateTextView.setTextColor(Color.BLACK)
-                                dateTextView.gravity = Gravity.CENTER
-                                dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                                dateTextView.setTypeface(null, Typeface.BOLD)
-                                forecastLayout.addView(dateTextView)
-
-                                val timeTextView = TextView(this@MainActivity)
-                                timeTextView.text = formattedTime
-                                timeTextView.setTextColor(Color.BLACK)
-                                timeTextView.gravity = Gravity.CENTER
-                                timeTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                                timeTextView.setTypeface(null, Typeface.BOLD)
-                                forecastLayout.addView(timeTextView)
-
-                                val tempTextView = TextView(this@MainActivity)
-                                tempTextView.text = temp
-                                tempTextView.setTextColor(Color.BLACK)
-                                tempTextView.gravity = Gravity.CENTER
-                                tempTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                                tempTextView.setTypeface(null, Typeface.BOLD)
-                                forecastLayout.addView(tempTextView)
-
-                                val windTextView = TextView(this@MainActivity)
-                                windTextView.text = wind
-                                windTextView.setTextColor(Color.BLACK)
-                                windTextView.gravity = Gravity.CENTER
-                                windTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                                windTextView.setTypeface(null, Typeface.BOLD)
-                                forecastLayout.addView(windTextView)
-
-                                val humidityTextView = TextView(this@MainActivity)
-                                humidityTextView.text = humidity
-                                humidityTextView.setTextColor(Color.BLACK)
-                                humidityTextView.gravity = Gravity.CENTER
-                                humidityTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                                humidityTextView.setTypeface(null, Typeface.BOLD)
-                                forecastLayout.addView(humidityTextView)
-
-                                horizontalLayout.addView(forecastLayout)
-
+                                xvalue.add("$formattedTime\n$wind\n$humidity")
+                                lineentry.add(Entry(count, temp))
+                                count++
                             }
-                            linearLayout.addView(horizontalLayout)
+
+                            val linedataset = LineDataSet(lineentry, "Temperatura en °")
+                            linedataset.setDrawIcons(true)
+                            linedataset.setDrawValues(true)
+                            linedataset.color = resources.getColor(R.color.color2)
+
+                            val xAxis = chart.xAxis
+                            xAxis.valueFormatter = IndexAxisValueFormatter(xvalue)
+                            xAxis.textSize = 18f
+                            xAxis.typeface = Typeface.DEFAULT_BOLD
+                            xAxis.position = XAxis.XAxisPosition.BOTTOM
+                            chart.setXAxisRenderer(
+                                CustomXAxisRenderer(
+                                    chart.viewPortHandler,
+                                    chart.xAxis,
+                                    chart.getTransformer(YAxis.AxisDependency.LEFT)
+                                )
+                            )
+
+                            val data= LineData(linedataset)
+
+                            data.setValueTextSize(18f)
+                            data.setValueTypeface(Typeface.DEFAULT_BOLD)
+
+                            chart.data = data
+
+                            val legend = chart.legend
+                            legend.verticalAlignment = Legend.LegendVerticalAlignment.TOP
+
+                            chart.axisLeft.setDrawLabels(false)
+                            chart.axisRight.setDrawLabels(false)
+                            chart.animateXY(2000,2000)
+                            chart.extraLeftOffset = 40f
+                            chart.extraRightOffset = 45f
+                            chart.extraBottomOffset = 60f
+                            chart.description = null
+
+                            linearLayout.addView(chart)
                         }
                     } else {
                         Toast.makeText(
