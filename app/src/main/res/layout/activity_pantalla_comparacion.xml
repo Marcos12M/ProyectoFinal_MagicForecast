@@ -1,130 +1,156 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#49716F">
+    android:background="#49716F"
+    android:orientation="vertical">
 
     <RelativeLayout
+        android:id="@+id/boton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <Button
             android:id="@+id/botonRegresar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
+            android:backgroundTint="#E08A02"
+            android:text="@string/regresar"
             android:textAlignment="textStart"
-            android:text="◀ Regresar"
-            android:backgroundTint="#E08A02"/>
+            android:textColor="@color/white"
+            android:textStyle="bold" />
 
     </RelativeLayout>
 
-    <!-- RelativeLayout para SearchView -->
-    <RelativeLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/linear1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/linear2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/boton"
+        app:layout_constraintVertical_weight="1">
 
-        <!-- SearchView -->
-        <SearchView
-            android:id="@+id/search_viewComparar"
+        <!-- RelativeLayout para SearchView -->
+        <RelativeLayout
+            android:id="@+id/search1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="30dp"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/bg_white_rounded"
-            android:queryHint="Busca una ciudad"
-            android:submitBackground="@drawable/bg_white_rounded" />
+            app:layout_constraintTop_toTopOf="parent">
+            <!--app:layout_constraintBottom_toTopOf="@id/forecast_day1"-->
 
-    </RelativeLayout>
-
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="190dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="wrap_content"
+            <!-- SearchView -->
+            <SearchView
+                android:id="@+id/search_viewComparar"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:src="@drawable/graficaprueba"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter"
-                android:layout_margin="8dp"
-                android:contentDescription="Grafica del clima 1"/>
-        </LinearLayout>
+                android:layout_marginHorizontal="30dp"
+                android:background="@drawable/bg_white_rounded"
+                android:queryHint="Busca una ciudad"
+                android:submitBackground="@drawable/bg_white_rounded" />
 
-    </HorizontalScrollView>
+        </RelativeLayout>
 
-    <LinearLayout
+        <HorizontalScrollView
+            android:id="@+id/forecast_day1"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/mapView1"
+            app:layout_constraintVertical_weight="1">
+
+            <LinearLayout
+                android:id="@+id/linearLayout_forecastDAY1"
+                android:layout_width="1200dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="5dp"
+                android:orientation="vertical">
+
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/chartForecast1"
+                    android:layout_width="1000dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="fill_horizontal" />
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <!-- ImageView en la parte inferior -->
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/mapView1"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:padding="10dp"
+            app:layout_constraintTop_toBottomOf="@id/search1" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/linear2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/linear1"
+        app:layout_constraintVertical_weight="1">
 
-    </LinearLayout>
-
-    <!-- ImageView en la parte inferior -->
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/mapView1"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:padding="10dp"/>
-
-    <!-- RelativeLayout para SearchView -->
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <!-- SearchView -->
-        <SearchView
-            android:id="@+id/search_viewComparar2"
+        <!-- RelativeLayout para SearchView -->
+        <RelativeLayout
+            android:id="@+id/search2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="30dp"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/bg_white_rounded"
-            android:queryHint="Busca una ciudad"
-            android:submitBackground="@drawable/bg_white_rounded" />
+            app:layout_constraintTop_toTopOf="parent">
 
-    </RelativeLayout>
-
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="190dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="wrap_content"
+            <!-- SearchView -->
+            <SearchView
+                android:id="@+id/search_viewComparar2"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:src="@drawable/graficaprueba"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter"
-                android:layout_margin="8dp"
-                android:contentDescription="Grafica del clima 1"/>
-        </LinearLayout>
+                android:layout_marginHorizontal="30dp"
+                android:background="@drawable/bg_white_rounded"
+                android:queryHint="Busca una ciudad"
+                android:submitBackground="@drawable/bg_white_rounded" />
 
-    </HorizontalScrollView>
+        </RelativeLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        <HorizontalScrollView
+            android:id="@+id/forecast_day2"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/mapView2"
+            app:layout_constraintVertical_weight="1">
 
-    </LinearLayout>
+            <LinearLayout
+                android:id="@+id/linearLayout_forecastDAY2"
+                android:layout_width="1200dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="5dp"
+                android:orientation="vertical">
 
-    <!-- ImageView en la parte inferior -->
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/mapView2"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:padding="10dp"/>
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/chartForecast2"
+                    android:layout_width="1000dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="fill_horizontal"/>
+            </LinearLayout>
+        </HorizontalScrollView>
 
-</LinearLayout>
+        <!-- ImageView en la parte inferior -->
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/mapView2"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:padding="10dp"
+            app:layout_constraintTop_toBottomOf="@id/search2" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

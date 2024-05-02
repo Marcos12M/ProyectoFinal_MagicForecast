@@ -607,7 +607,6 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     if (response.isSuccessful) {
                         response.body()?.let {
-                            val entries = ArrayList<Entry>()
                             val list = it.list
                             val filteredList = list.take(8)
 
@@ -617,13 +616,6 @@ class MainActivity : AppCompatActivity() {
                                 findViewById<LineChart>(R.id.chartForecast)
                             linearLayout.removeAllViews()
 
-                            val horizontalLayout = LinearLayout(this@MainActivity)
-                            horizontalLayout.layoutParams = LinearLayout.LayoutParams(
-                                LinearLayout.LayoutParams.MATCH_PARENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT
-                            )
-                            horizontalLayout.orientation = LinearLayout.HORIZONTAL
-
                             val xvalue =  ArrayList<String>()
                             var count = 0f
                             val lineentry = ArrayList<Entry>()
@@ -632,8 +624,6 @@ class MainActivity : AppCompatActivity() {
                                 val dateTimeString = forecast.dt_txt
                                 val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                                 val dateTime = LocalDateTime.parse(dateTimeString, formatter)
-                                val formattedDate =
-                                    dateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                                 val formattedTime =
                                     dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
 
