@@ -629,7 +629,6 @@ class MainActivity : AppCompatActivity() {
                                 val formattedTime =
                                     dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
 
-
                                 val temp = forecast.main.temp.toFloat()
                                 val wind = "${forecast.wind.speed} m/s"
                                 val humidity = "${forecast.main.humidity}%"
@@ -710,7 +709,13 @@ class MainActivity : AppCompatActivity() {
                         val dao = AppDatabase.getDatabase(applicationContext).forecastDayDao()
                         val savedForecastDayList = dao.getAllForecast()
 
-                        if (savedForecastDayList.isNotEmpty()) {
+                        val lastEightForecast = if (savedForecastDayList.size >= 8) {
+                            savedForecastDayList.subList(savedForecastDayList.size - 8, savedForecastDayList.size)
+                        } else {
+                            savedForecastDayList
+                        }
+
+                        if (lastEightForecast.isNotEmpty()) {
                             // Si se encuentran datos del pronóstico del día en la base de datos, crea y muestra las vistas
                             withContext(Dispatchers.Main) {
                                 val linearLayout =

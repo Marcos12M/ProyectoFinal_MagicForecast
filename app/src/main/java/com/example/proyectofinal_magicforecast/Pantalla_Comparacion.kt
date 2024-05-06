@@ -31,6 +31,13 @@ import retrofit2.Response
 import java.io.IOException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import com.example.proyectofinal_magicforecast.data.*
+import android.util.Log
+import androidx.appcompat.app.AlertDialog
 
 class Pantalla_Comparacion : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView1: MapView
@@ -151,6 +158,8 @@ class Pantalla_Comparacion : AppCompatActivity(), OnMapReadyCallback {
                             var count = 0f
                             val lineentry = ArrayList<Entry>()
 
+                            val dao = AppDatabase.getDatabase(applicationContext).forecastDayDao()
+
                             filteredList.forEach { forecast ->
                                 val dateTimeString = forecast.dt_txt
                                 val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -163,6 +172,22 @@ class Pantalla_Comparacion : AppCompatActivity(), OnMapReadyCallback {
                                 xvalue.add("$formattedTime\n$wind\n$humidity")
                                 lineentry.add(Entry(count, temp))
                                 count++
+
+                                val forecastDAY = ForecastDayBD(
+                                    date = formattedTime,
+                                    temp = forecast.main.temp,
+                                    windSpeed = forecast.wind.speed,
+                                    humidity = forecast.main.humidity,
+                                )
+
+                                // Insertar en la base de datos utilizando coroutines
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    dao.insert(forecastDAY)
+
+                                    // Registro de un mensaje de log después de insertar en la base de datos
+                                    Log.d("ForecastDAY1-2", "Datos del pronóstico insertados en la base de datos: Date: $formattedTime, Temperature: $temp, Wind Speed: $wind, Humidity: $humidity")
+                                }
+
                             }
 
                             val linedataset = LineDataSet(lineentry, "Temperatura en °")
@@ -215,6 +240,107 @@ class Pantalla_Comparacion : AppCompatActivity(), OnMapReadyCallback {
                 override fun onFailure(call: Call<ForecastResponse>, t: Throwable) {
                     Toast.makeText(applicationContext, t.message, Toast.LENGTH_SHORT).show()
                     println(t.message)
+
+                    val builder = AlertDialog.Builder(this@Pantalla_Comparacion)
+                    builder.setTitle("No se encontro nada")
+                    builder.setMessage("Se han cargado los datos desde la base de datos las ultimas busquedas")
+                    builder.setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    val dialog = builder.create()
+                    dialog.show()
+
+                    // Intenta obtener los últimos datos del pronóstico del día de la base de datos
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val dao = AppDatabase.getDatabase(applicationContext).forecastDayDao()
+                        val savedForecastDayList = dao.getAllForecast()
+
+                        val lastEightForecast = if (savedForecastDayList.size >= 8) {
+                            savedForecastDayList.subList(savedForecastDayList.size - 8, savedForecastDayList.size)
+                        } else {
+                            savedForecastDayList
+                        }
+
+                        if (lastEightForecast.isNotEmpty()) {
+                            // Si se encuentran datos del pronóstico del día en la base de datos, crea y muestra las vistas
+                            withContext(Dispatchers.Main) {
+                                val linearLayout: LinearLayout
+                                val chart: LineChart
+
+                                if (cual == 1) {
+                                    linearLayout = findViewById<LinearLayout>(R.id.linearLayout_forecastDAY1)
+                                    chart = findViewById<LineChart>(R.id.chartForecast1)
+                                } else {
+                                    linearLayout = findViewById<LinearLayout>(R.id.linearLayout_forecastDAY2)
+                                    chart = findViewById<LineChart>(R.id.chartForecast2)
+                                }
+
+                                linearLayout.removeAllViews()
+
+                                val xvalue = ArrayList<String>()
+                                var count = 0f
+                                val lineentry = ArrayList<Entry>()
+
+                                savedForecastDayList.forEach { forecast ->
+                                    val formattedTime = forecast.date
+                                    val temp = forecast.temp.toFloat()
+
+                                    val wind = "${forecast.windSpeed} m/s"
+                                    val humidity = "${forecast.humidity}%"
+                                    xvalue.add("$formattedTime\n$wind\n$humidity")
+                                    lineentry.add(Entry(count, temp))
+                                    count++
+                                }
+
+                                val linedataset = LineDataSet(lineentry, "Temperatura en °")
+                                linedataset.setDrawIcons(true)
+                                linedataset.setDrawValues(true)
+                                linedataset.color = resources.getColor(R.color.color2)
+
+                                val xAxis = chart.xAxis
+                                xAxis.valueFormatter = IndexAxisValueFormatter(xvalue)
+                                xAxis.textSize = 18f
+                                xAxis.typeface = Typeface.DEFAULT_BOLD
+                                xAxis.position = XAxis.XAxisPosition.BOTTOM
+                                chart.setXAxisRenderer(
+                                    CustomXAxisRenderer(
+                                        chart.viewPortHandler,
+                                        chart.xAxis,
+                                        chart.getTransformer(YAxis.AxisDependency.LEFT)
+                                    )
+                                )
+
+                                val data = LineData(linedataset)
+
+                                data.setValueTextSize(18f)
+                                data.setValueTypeface(Typeface.DEFAULT_BOLD)
+
+                                chart.data = data
+
+                                val legend = chart.legend
+                                legend.verticalAlignment = Legend.LegendVerticalAlignment.TOP
+
+                                chart.axisLeft.setDrawLabels(false)
+                                chart.axisRight.setDrawLabels(false)
+                                chart.animateXY(2000, 2000)
+                                chart.extraLeftOffset = 40f
+                                chart.extraRightOffset = 45f
+                                chart.extraBottomOffset = 60f
+                                chart.description = null
+
+                                linearLayout.addView(chart)
+                            }
+                        } else {
+                            // Si no se encuentran datos del pronóstico del día en la base de datos, muestra un mensaje de error
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "No se encontraron datos del pronóstico del día en la base de datos",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
                 }
             })
 
