@@ -48,7 +48,8 @@ class Pantalla_Comparacion : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pantalla_comparacion)
-        fetchForecastDay(0.0,0.0,1)
+        fetchForecastDay(0.0,0.0,1, true)
+        fetchForecastDay(0.0,0.0,2, false)
         val backButton: Button = findViewById(R.id.botonRegresar)
         backButton.setOnClickListener {
             finish() // Cierra la Activity actual y regresa a la anterior en la pila de Activities
@@ -114,7 +115,7 @@ class Pantalla_Comparacion : AppCompatActivity(), OnMapReadyCallback {
                 if (!addressList.isNullOrEmpty()) {
                     val address = addressList[0]
                     val latLng = LatLng(address.latitude, address.longitude)
-                    fetchForecastDay(address.latitude,address.longitude, cual)
+                    fetchForecastDay(address.latitude,address.longitude, cual, false)
                     googleMap.clear()
                     googleMap.addMarker(MarkerOptions().position(latLng).title(cityName))
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10f))
@@ -129,7 +130,7 @@ class Pantalla_Comparacion : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun fetchForecastDay(lat: Double, lon: Double , cual: Int) {
+    private fun fetchForecastDay(lat: Double, lon: Double , cual: Int, mostrarAviso: Boolean) {
         ClienteAPI.instance.getForecast(lat, lon, 40, "0f2d487b9ae4f71cc6f8eacc1f5cad8c", "metric")
             .enqueue(object : retrofit2.Callback<ForecastResponse> {
                 @RequiresApi(Build.VERSION_CODES.O)
@@ -246,109 +247,114 @@ class Pantalla_Comparacion : AppCompatActivity(), OnMapReadyCallback {
                     builder.setMessage("Se han cargado los datos desde la base de datos las ultimas busquedas")
                     builder.setPositiveButton("OK") { dialog, _ ->
                         dialog.dismiss()
-                        // Intenta obtener los últimos datos del pronóstico del día de la base de datos
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val dao = AppDatabase.getDatabase(applicationContext).forecastDayDao()
-                            val savedForecastDayList = dao.getAllForecast(cual)
+                    }
+                    val dialog = builder.create()
 
-                            val lastEightForecast = if (savedForecastDayList.size >= 8) {
-                                savedForecastDayList.subList(savedForecastDayList.size - 8, savedForecastDayList.size)
-                            } else {
-                                savedForecastDayList
-                            }
+                    if (mostrarAviso) {
+                    dialog.show()
+                    }
 
-                            if (lastEightForecast.isNotEmpty()) {
-                                // Si se encuentran datos del pronóstico del día en la base de datos, crea y muestra las vistas
-                                withContext(Dispatchers.Main) {
-                                    val linearLayout: LinearLayout
-                                    val chart: LineChart
-                                    val searchView: SearchView
+                    // Intenta obtener los últimos datos del pronóstico del día de la base de datos
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val dao = AppDatabase.getDatabase(applicationContext).forecastDayDao()
+                        val savedForecastDayList = dao.getAllForecast(cual)
 
-                                    if (cual == 1) {
-                                        linearLayout = findViewById<LinearLayout>(R.id.linearLayout_forecastDAY1)
-                                        chart = findViewById<LineChart>(R.id.chartForecast1)
-                                        findViewById<HorizontalScrollView>(R.id.forecast_day1).visibility = View.VISIBLE
-                                        searchView = findViewById<SearchView>(R.id.search_viewComparar)
-                                    }else{
-                                        linearLayout = findViewById<LinearLayout>(R.id.linearLayout_forecastDAY2)
-                                        chart = findViewById<LineChart>(R.id.chartForecast2)
-                                        findViewById<HorizontalScrollView>(R.id.forecast_day2).visibility = View.VISIBLE
-                                        searchView = findViewById<SearchView>(R.id.search_viewComparar2)
-                                    }
+                        val lastEightForecast = if (savedForecastDayList.size >= 8) {
+                            savedForecastDayList.subList(savedForecastDayList.size - 8, savedForecastDayList.size)
+                        } else {
+                            savedForecastDayList
+                        }
 
-                                    linearLayout.removeAllViews()
+                        if (lastEightForecast.isNotEmpty()) {
+                            // Si se encuentran datos del pronóstico del día en la base de datos, crea y muestra las vistas
+                            withContext(Dispatchers.Main) {
+                                val linearLayout: LinearLayout
+                                val chart: LineChart
+                                val searchView: SearchView
 
-                                    val xvalue = ArrayList<String>()
-                                    var count = 0f
-                                    val lineentry = ArrayList<Entry>()
+                                if (cual == 1) {
+                                    linearLayout = findViewById<LinearLayout>(R.id.linearLayout_forecastDAY1)
+                                    chart = findViewById<LineChart>(R.id.chartForecast1)
+                                    findViewById<HorizontalScrollView>(R.id.forecast_day1).visibility = View.VISIBLE
+                                    searchView = findViewById<SearchView>(R.id.search_viewComparar)
+                                }else{
+                                    linearLayout = findViewById<LinearLayout>(R.id.linearLayout_forecastDAY2)
+                                    chart = findViewById<LineChart>(R.id.chartForecast2)
+                                    findViewById<HorizontalScrollView>(R.id.forecast_day2).visibility = View.VISIBLE
+                                    searchView = findViewById<SearchView>(R.id.search_viewComparar2)
+                                }
 
-                                    lastEightForecast.forEach { forecast ->
-                                        val formattedTime = forecast.date
-                                        val temp = forecast.temp.toFloat()
+                                linearLayout.removeAllViews()
 
-                                        val wind = "${forecast.windSpeed} m/s"
-                                        val humidity = "${forecast.humidity}%"
-                                        searchView.setQuery(forecast.cityName, false)
-                                        xvalue.add("$formattedTime\n$wind\n$humidity")
-                                        lineentry.add(Entry(count, temp))
-                                        count++
-                                    }
+                                val xvalue = ArrayList<String>()
+                                var count = 0f
+                                val lineentry = ArrayList<Entry>()
 
-                                    val linedataset = LineDataSet(lineentry, "Temperatura en °")
-                                    linedataset.setDrawIcons(true)
-                                    linedataset.setDrawValues(true)
-                                    linedataset.color = resources.getColor(R.color.color2)
+                                lastEightForecast.forEach { forecast ->
+                                    val formattedTime = forecast.date
+                                    val temp = forecast.temp.toFloat()
 
-                                    val xAxis = chart.xAxis
-                                    xAxis.valueFormatter = IndexAxisValueFormatter(xvalue)
-                                    xAxis.textSize = 18f
-                                    xAxis.typeface = Typeface.DEFAULT_BOLD
-                                    xAxis.position = XAxis.XAxisPosition.BOTTOM
-                                    chart.setXAxisRenderer(
-                                        CustomXAxisRenderer(
-                                            chart.viewPortHandler,
-                                            chart.xAxis,
-                                            chart.getTransformer(YAxis.AxisDependency.LEFT)
-                                        )
+                                    val wind = "${forecast.windSpeed} m/s"
+                                    val humidity = "${forecast.humidity}%"
+                                    searchView.isIconifiedByDefault = false
+                                    searchView.setQuery(forecast.cityName, false)
+                                    xvalue.add("$formattedTime\n$wind\n$humidity")
+                                    lineentry.add(Entry(count, temp))
+                                    count++
+                                }
+
+                                val linedataset = LineDataSet(lineentry, "Temperatura en °")
+                                linedataset.setDrawIcons(true)
+                                linedataset.setDrawValues(true)
+                                linedataset.color = resources.getColor(R.color.color2)
+
+                                val xAxis = chart.xAxis
+                                xAxis.valueFormatter = IndexAxisValueFormatter(xvalue)
+                                xAxis.textSize = 18f
+                                xAxis.typeface = Typeface.DEFAULT_BOLD
+                                xAxis.position = XAxis.XAxisPosition.BOTTOM
+                                chart.setXAxisRenderer(
+                                    CustomXAxisRenderer(
+                                        chart.viewPortHandler,
+                                        chart.xAxis,
+                                        chart.getTransformer(YAxis.AxisDependency.LEFT)
                                     )
+                                )
 
-                                    val data = LineData(linedataset)
+                                val data = LineData(linedataset)
 
-                                    data.setValueTextSize(18f)
-                                    data.setValueTypeface(Typeface.DEFAULT_BOLD)
+                                data.setValueTextSize(18f)
+                                data.setValueTypeface(Typeface.DEFAULT_BOLD)
 
-                                    chart.data = data
+                                chart.data = data
 
-                                    val legend = chart.legend
-                                    legend.verticalAlignment = Legend.LegendVerticalAlignment.TOP
+                                val legend = chart.legend
+                                legend.verticalAlignment = Legend.LegendVerticalAlignment.TOP
 
-                                    chart.axisLeft.setDrawLabels(false)
-                                    chart.axisRight.setDrawLabels(false)
-                                    chart.animateXY(2000, 2000)
-                                    chart.extraLeftOffset = 40f
-                                    chart.extraRightOffset = 45f
-                                    chart.extraBottomOffset = 60f
-                                    chart.description = null
+                                chart.axisLeft.setDrawLabels(false)
+                                chart.axisRight.setDrawLabels(false)
+                                chart.animateXY(2000, 2000)
+                                chart.extraLeftOffset = 40f
+                                chart.extraRightOffset = 45f
+                                chart.extraBottomOffset = 60f
+                                chart.description = null
 
-                                    println(chart.data.dataSets)
+                                println(chart.data.dataSets)
 
-                                    linearLayout.addView(chart)
-                                    println(linearLayout)
-                                }
-                            } else {
-                                // Si no se encuentran datos del pronóstico del día en la base de datos, muestra un mensaje de error
-                                withContext(Dispatchers.Main) {
-                                    Toast.makeText(
-                                        applicationContext,
-                                        "No se encontraron datos del pronóstico del día en la base de datos",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+                                linearLayout.addView(chart)
+                                println(linearLayout)
+                            }
+                        } else {
+                            // Si no se encuentran datos del pronóstico del día en la base de datos, muestra un mensaje de error
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "No se encontraron datos del pronóstico del día en la base de datos",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     }
-                    val dialog = builder.create()
-                    dialog.show()
                 }
             })
 
