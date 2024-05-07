@@ -7,8 +7,8 @@ import androidx.room.Query
 
 @Dao
 interface ForecastDayDao {
-    @Query("SELECT * FROM forecastDAY")
-    fun getAllForecast(): List<ForecastDayBD>
+    @Query("SELECT * FROM forecastDAY WHERE posicion = :posicion")
+    fun getAllForecast(posicion: Int): List<ForecastDayBD>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(forecast: ForecastDayBD)

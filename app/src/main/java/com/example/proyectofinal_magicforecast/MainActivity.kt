@@ -393,7 +393,6 @@ class MainActivity : AppCompatActivity() {
 
                         val dao = AppDatabase.getDatabase(applicationContext).forecastDao()
 
-
                         filteredList.forEach { forecast ->
                             val dateTimeString = forecast.dt_txt
                             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -641,6 +640,8 @@ class MainActivity : AppCompatActivity() {
                                     temp = forecast.main.temp,
                                     windSpeed = forecast.wind.speed,
                                     humidity = forecast.main.humidity,
+                                    posicion = 0,
+                                    cityName = findViewById<TextView>(R.id.textCiudad).text.toString()
                                 )
 
                                 // Insertar en la base de datos utilizando coroutines
@@ -707,7 +708,7 @@ class MainActivity : AppCompatActivity() {
                     // Intenta obtener los últimos datos del pronóstico del día de la base de datos
                     CoroutineScope(Dispatchers.IO).launch {
                         val dao = AppDatabase.getDatabase(applicationContext).forecastDayDao()
-                        val savedForecastDayList = dao.getAllForecast()
+                        val savedForecastDayList = dao.getAllForecast(0)
 
                         val lastEightForecast = if (savedForecastDayList.size >= 8) {
                             savedForecastDayList.subList(savedForecastDayList.size - 8, savedForecastDayList.size)
@@ -728,7 +729,7 @@ class MainActivity : AppCompatActivity() {
                                 var count = 0f
                                 val lineentry = ArrayList<Entry>()
 
-                                savedForecastDayList.forEach { forecast ->
+                                lastEightForecast.forEach { forecast ->
                                     val formattedTime = forecast.date
                                     val temp = forecast.temp.toFloat()
 

@@ -9,6 +9,8 @@ data class ForecastDayBD (
     val date: String,
     val temp: Double,
     val windSpeed: Double,
-    val humidity: Int
+    val humidity: Int,
+    val posicion: Int,
+    val cityName: String
 )
 
